@@ -7,6 +7,6 @@ namespace OrmGenerator
 {
     public interface ICodeGenerator
     {
-        IAsyncEnumerable<ICodeFile> GenerateAsync(IEnumerable<EntityDefinition> entities);
+        IEnumerable<ICodeFile> Generate(IEnumerable<EntityDefinition> entities);
     }
 }

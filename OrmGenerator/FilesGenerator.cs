@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace OrmGenerator
 {
-    internal class FilesGenerator : IGenerator
+    public class FilesGenerator : IGenerator
     {
         public FilesGenerator(string targetDirectory, ICodeGenerator codeGenerator)
         {
@@ -18,10 +19,12 @@ namespace OrmGenerator
 
         public async Task GenerateAsync(IEnumerable<EntityDefinition> entities)
         {
-            await foreach (var codeFile in CodeGenerator.GenerateAsync(entities).ConfigureAwait(false))
+            foreach (var codeFile in CodeGenerator.Generate(entities))
             {
-                var path = System.IO.Path.Combine(TargetDirectory, codeFile.RelativePath);
-                await System.IO.File.WriteAllTextAsync(path, codeFile.Content).ConfigureAwait(false);
+                var path = Path.Combine(TargetDirectory, codeFile.RelativePath);
+                var dir = Path.GetDirectoryName(path);
+                Directory.CreateDirectory(dir);
+                await File.WriteAllTextAsync(path, codeFile.Content).ConfigureAwait(false);
             }
         }
     }

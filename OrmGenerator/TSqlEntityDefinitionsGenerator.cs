@@ -5,13 +5,14 @@ using System.Data.SqlClient;
 using System.Text;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Options;
 
 namespace OrmGenerator
 {
     public class TSqlEntityDefinitionsGenerator : IEntityDefinitionsGenerator
     {
-        private readonly SqlConnection _connection;
         private readonly ITypeMapper _typeMapper;
+        private readonly IOptionsMonitor<TSqlEntityDefinitionsGeneratorOptions> _options;
         private static readonly string _schemaInfoQuery = @"SELECT C.TABLE_NAME, C.COLUMN_NAME, C.DATA_TYPE
 FROM INFORMATION_SCHEMA.COLUMNS C
 INNER JOIN INFORMATION_SCHEMA.TABLES T
@@ -19,19 +20,20 @@ INNER JOIN INFORMATION_SCHEMA.TABLES T
 WHERE T.TABLE_SCHEMA <> 'sys'";
         private static readonly string _schemaInfoQueryJustTables = $@"{_schemaInfoQuery} AND T.TABLE_TYPE='BASE TABLE'";
 
-        public bool JustTables { get; }
+        public string? ConnectionString { get; set; }
 
-        public TSqlEntityDefinitionsGenerator(SqlConnection connection, ITypeMapper typeMapper, bool justTables = true)
+        public TSqlEntityDefinitionsGenerator(ITypeMapper typeMapper, IOptionsMonitor<TSqlEntityDefinitionsGeneratorOptions> options)
         {
-            _connection = connection;
             _typeMapper = typeMapper;
-            JustTables = justTables;
+            _options = options;
         }
 
         public async Task<IEnumerable<EntityDefinition>> GenerateEntityDefinitions()
         {
-            var query = JustTables ? _schemaInfoQueryJustTables : _schemaInfoQuery;
-            var schemaInfos = await _connection.QueryAsync<SchemaInfo>(query).ConfigureAwait(false);
+            var opt = _options.CurrentValue;
+            using var con = new SqlConnection(ConnectionString ?? throw new InvalidOperationException($"The connection string given as option can not be null."));
+            var query = opt.JustTables ? _schemaInfoQueryJustTables : _schemaInfoQuery;
+            var schemaInfos = await con.QueryAsync<SchemaInfo>(query).ConfigureAwait(false);
             return ExtractEntityDefinitions(schemaInfos);
         }
 
