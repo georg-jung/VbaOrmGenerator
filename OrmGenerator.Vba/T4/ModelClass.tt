@@ -1,0 +1,82 @@
+﻿<#@ template language="C#" #>
+<#@ assembly name="System.Core" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Text" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ output extension=".cls" #>
+VERSION 1.0 CLASS
+BEGIN
+  MultiUse = -1  'True
+END
+Attribute VB_Name = "<#= Entity.Name #>"
+Attribute VB_GlobalNameSpace = False
+Attribute VB_Creatable = False
+Attribute VB_PredeclaredId = False
+Attribute VB_Exposed = False
+'@Folder("Models")
+Option Explicit
+
+Implements IMappable
+
+Private Type TClass
+<# foreach (var item in Entity.Properties)
+   { #>
+    <#= item.Key #> As <#= item.Value #>
+<# } // end of foreach
+#>
+End Type
+
+Private this As TClass
+
+Private mobjClassProperties As Dictionary
+
+
+' =============================================================================
+' PROPERTIES
+' =============================================================================
+
+<# foreach (var item in Entity.Properties)
+   { #>
+Public Property Get <#= item.Key #>() As <#= item.Value.Type #>
+    <#= item.Key #> = this.<#= item.Key #>
+End Property
+Public Property Let <#= item.Key #>(ByVal Value As <#= item.Value.Type #>)
+    this.<#= item.Key #> = Value
+End Property
+
+<# } // end of foreach
+#>
+
+' =============================================================================
+' INTERFACE IMPLEMENTATIONS
+' =============================================================================
+
+Private Property Get IMappable_MappedProperties() As Dictionary
+    If mobjClassProperties Is Nothing Then
+        Set mobjClassProperties = New Dictionary
+        With mobjClassProperties
+<# foreach (var item in Entity.Properties)
+   { #>
+			.Add "<#= item.Key #>", "<#= item.Key #>"
+<# } // end of foreach
+#>
+        End With
+    End If
+    Set IMappable_MappedProperties = mobjClassProperties
+End Property
+
+Private Property Get IMappable_TableName() As String
+    IMappable_TableName = "<#= Entity.TableName #>"
+End Property
+
+Private Function IMappable_CreateNew() As IMappable
+    Set IMappable_CreateNew = New <#= Entity.Name #>
+End Function
+ 
+Private Function IMappable_GetPropertyValue(ByVal strPropertyName As String) As Variant
+    IMappable_GetPropertyValue = CallByName(Me, strPropertyName, VbGet)
+End Function
+
+Private Sub IMappable_LetPropertyValue(ByVal strPropertyName As String, ByVal vntValue As Variant)
+    CallByName Me, strPropertyName, VbCallType.VbLet, vntValue
+End Sub

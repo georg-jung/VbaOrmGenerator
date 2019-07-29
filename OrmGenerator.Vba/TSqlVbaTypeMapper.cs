@@ -1,29 +1,29 @@
-﻿using System;
+﻿using Microsoft.Extensions.Options;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace OrmGenerator
+namespace OrmGenerator.Vba
 {
     public class TSqlVbaTypeMapper : ITypeMapper
     {
-        public TSqlVbaTypeMapper(bool variantOnUnknownType = true, bool use64bitTypes = true)
-        {
-            VariantOnUnknownType = variantOnUnknownType;
-            Use64BitTypes = use64bitTypes;
-        }
+        private readonly IOptionsMonitor<TSqlVbaTypeMapperOptions> _options;
 
-        public bool VariantOnUnknownType { get; }
-        public bool Use64BitTypes { get; }
+        public TSqlVbaTypeMapper(IOptionsMonitor<TSqlVbaTypeMapperOptions> options)
+        {
+            _options = options;
+        }
 
         public string Map(string inputType)
         {
+            var opt = _options.CurrentValue;
             return inputType.ToLowerInvariant() switch
             {
                 "datetime" => "Date",
                 "datetime2" => "Date",
                 "time" => "Date",
                 "smalldatetime" => "Date",
-                "bigint" => Use64BitTypes ? "LongLong" : "Long",
+                "bigint" => opt.Use64bitTypes ? "LongLong" : "Long",
                 "int" => "Long",
                 "smallint" => "Integer",
                 "tinyint" => "Byte",
@@ -46,7 +46,7 @@ namespace OrmGenerator
                 "char" => "String",
                 "nchar" => "String",
                 "text" => "String",
-                _ => VariantOnUnknownType ? "Variant" : throw new ArgumentException($"There is no VBA type mapping for T-SQL type {inputType}")
+                _ => opt.VariantOnUnknownType ? "Variant" : throw new ArgumentException($"There is no VBA type mapping for T-SQL type {inputType}")
             };
         }
     }

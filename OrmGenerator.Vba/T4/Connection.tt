@@ -1,0 +1,50 @@
+﻿<#@ template language="C#" #>
+<#@ assembly name="System.Core" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Text" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ output extension=".bas" #>
+Attribute VB_Name = "Connection"
+'@Folder("Generic")
+Option Explicit
+
+Private connection As ADODB.connection
+
+Private Function CreateConnection() As ADODB.connection
+    Dim SqlServer As String, SqlDB As String, SqlUser As String, SqlPwd As String
+    Dim conStr As String
+        
+    SqlServer = "example.database.windows.net"
+    SqlDB = "some-db"
+    SqlUser = "some-user"
+    SqlPwd = "some-password"
+
+    conStr = "Provider=SQLNCLI11;" & _
+        "Data Source=" & SqlServer & ";" & _
+        "Initial Catalog=" & SqlDB & ";" & _
+        "User ID=" & SqlUser & ";" & _
+        "Password=" & SqlPwd & ";"
+
+    Set CreateConnection = New ADODB.connection
+    CreateConnection.ConnectionString = conStr
+End Function
+
+Public Function GetConnection() As ADODB.connection
+    If connection Is Nothing Then Set connection = CreateConnection()
+    Set GetConnection = connection
+End Function
+
+Public Function GetOpenConnection() As ADODB.connection
+    Dim con As ADODB.connection
+    Set con = GetConnection()
+    If Not connection.State = adStateOpen Then
+        con.Open
+    End If
+    Set GetOpenConnection = con
+End Function
+
+Public Sub DisposeConnection()
+    If connection Is Nothing Then Exit Sub
+    If connection.State = adStateOpen Then connection.Close
+    Set connection = Nothing
+End Sub

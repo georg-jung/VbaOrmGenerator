@@ -1,0 +1,70 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.CodeDom" Version="4.5.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\OrmGenerator\OrmGenerator.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="T4\Connection.tt">
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+      <LastGenOutput>Connection.cs</LastGenOutput>
+    </None>
+    <None Update="T4\OrmAdodb.tt">
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+      <LastGenOutput>OrmAdodb.cs</LastGenOutput>
+    </None>
+    <None Update="T4\IMappable.tt">
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+      <LastGenOutput>IMappable.cs</LastGenOutput>
+    </None>
+    <None Update="T4\IMapper.tt">
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+      <LastGenOutput>IMapper.cs</LastGenOutput>
+    </None>
+    <None Update="T4\ModelClass.tt">
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+      <LastGenOutput>ModelClass.cs</LastGenOutput>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Service Include="{508349b6-6b84-4df5-91f0-309beebad82d}" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="T4\Connection.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Connection.tt</DependentUpon>
+    </Compile>
+    <Compile Update="T4\OrmAdodb.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>OrmAdodb.tt</DependentUpon>
+    </Compile>
+    <Compile Update="T4\IMappable.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>IMappable.tt</DependentUpon>
+    </Compile>
+    <Compile Update="T4\IMapper.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>IMapper.tt</DependentUpon>
+    </Compile>
+    <Compile Update="T4\ModelClass.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>ModelClass.tt</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+</Project>
