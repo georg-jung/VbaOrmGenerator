@@ -1,6 +1,7 @@
 ﻿using Dapper;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Data.SqlClient;
 using System.Text;
 using System.Linq;
@@ -12,7 +13,8 @@ namespace OrmGenerator
     public class TSqlEntityDefinitionsGenerator : IEntityDefinitionsGenerator
     {
         private readonly ITypeMapper _typeMapper;
-        private readonly IOptionsMonitor<TSqlEntityDefinitionsGeneratorOptions> _options;
+        private readonly IDbConnection _connection;
+
         private static readonly string _schemaInfoQuery = @"SELECT C.TABLE_NAME, C.COLUMN_NAME, C.DATA_TYPE
 FROM INFORMATION_SCHEMA.COLUMNS C
 INNER JOIN INFORMATION_SCHEMA.TABLES T
@@ -20,20 +22,18 @@ INNER JOIN INFORMATION_SCHEMA.TABLES T
 WHERE T.TABLE_SCHEMA <> 'sys'";
         private static readonly string _schemaInfoQueryJustTables = $@"{_schemaInfoQuery} AND T.TABLE_TYPE='BASE TABLE'";
 
-        public string? ConnectionString { get; set; }
+        public bool JustTables { get; set; } = false;
 
-        public TSqlEntityDefinitionsGenerator(ITypeMapper typeMapper, IOptionsMonitor<TSqlEntityDefinitionsGeneratorOptions> options)
+        public TSqlEntityDefinitionsGenerator(ITypeMapper typeMapper, IDbConnection connection)
         {
             _typeMapper = typeMapper;
-            _options = options;
+            _connection = connection;
         }
 
         public async Task<IEnumerable<EntityDefinition>> GenerateEntityDefinitions()
         {
-            var opt = _options.CurrentValue;
-            using var con = new SqlConnection(ConnectionString ?? throw new InvalidOperationException($"The connection string given as option can not be null."));
-            var query = opt.JustTables ? _schemaInfoQueryJustTables : _schemaInfoQuery;
-            var schemaInfos = await con.QueryAsync<SchemaInfo>(query).ConfigureAwait(false);
+            var query = JustTables ? _schemaInfoQueryJustTables : _schemaInfoQuery;
+            var schemaInfos = await _connection.QueryAsync<SchemaInfo>(query).ConfigureAwait(false);
             return ExtractEntityDefinitions(schemaInfos);
         }
 

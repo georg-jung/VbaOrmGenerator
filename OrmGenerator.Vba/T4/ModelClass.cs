@@ -55,7 +55,7 @@ namespace OrmGenerator.Vba.T4
             this.Write(" As ");
             
             #line 24 "C:\Users\georg\source\repos\VbaOrmGenerator\OrmGenerator.Vba\T4\ModelClass.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(item.Value));
+            this.Write(this.ToStringHelper.ToStringWithCulture(item.Value.Type));
             
             #line default
             #line hidden

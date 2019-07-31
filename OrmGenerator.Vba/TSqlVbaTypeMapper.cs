@@ -7,23 +7,15 @@ namespace OrmGenerator.Vba
 {
     public class TSqlVbaTypeMapper : ITypeMapper
     {
-        private readonly IOptionsMonitor<TSqlVbaTypeMapperOptions> _options;
-
-        public TSqlVbaTypeMapper(IOptionsMonitor<TSqlVbaTypeMapperOptions> options)
-        {
-            _options = options;
-        }
-
         public string Map(string inputType)
         {
-            var opt = _options.CurrentValue;
             return inputType.ToLowerInvariant() switch
             {
                 "datetime" => "Date",
                 "datetime2" => "Date",
                 "time" => "Date",
                 "smalldatetime" => "Date",
-                "bigint" => opt.Use64bitTypes ? "LongLong" : "Long",
+                "bigint" => Use64bitTypes ? "LongLong" : "Long",
                 "int" => "Long",
                 "smallint" => "Integer",
                 "tinyint" => "Byte",
@@ -46,8 +38,12 @@ namespace OrmGenerator.Vba
                 "char" => "String",
                 "nchar" => "String",
                 "text" => "String",
-                _ => opt.VariantOnUnknownType ? "Variant" : throw new ArgumentException($"There is no VBA type mapping for T-SQL type {inputType}")
+                _ => VariantOnUnknownType ? "Variant" : throw new ArgumentException($"There is no VBA type mapping for T-SQL type {inputType}")
             };
         }
+
+        public bool VariantOnUnknownType { get; set; } = true;
+
+        public bool Use64bitTypes { get; set; } = true;
     }
 }

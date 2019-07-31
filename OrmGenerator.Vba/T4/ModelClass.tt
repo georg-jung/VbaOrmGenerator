@@ -21,7 +21,7 @@ Implements IMappable
 Private Type TClass
 <# foreach (var item in Entity.Properties)
    { #>
-    <#= item.Key #> As <#= item.Value #>
+    <#= item.Key #> As <#= item.Value.Type #>
 <# } // end of foreach
 #>
 End Type
